@@ -1,0 +1,679 @@
+:root {
+  /* slate panel, lighter than the original black */
+  --page: #20242c;
+  --panel-top: #3d4452;
+  --panel: #333a46;
+  --panel-bottom: #2b313b;
+  --bezel: #181c23; /* recessed: display frame, fader slots, log */
+  --line: #4d5768;
+  --key-top: #4b5463;
+  --key-bottom: #343b47;
+  --key-border: #5f6a7c;
+  --silk: #eef2f8;
+  --silk-dim: #b4bfce;
+  /* blue highlights */
+  --blue: #3a8dff;
+  --blue-light: #8cc4ff;
+  --blue-glow: 0 0 6px rgba(58, 141, 255, 0.6), 0 0 14px rgba(58, 141, 255, 0.25);
+  /* red LEDs */
+  --led: #ff2a1a;
+  --glow: 0 0 6px #ff2a1a, 0 0 14px rgba(255, 42, 26, 0.55);
+  --led-window: #1c0605; /* behind the red LED digits */
+  --info-text: #cdd5e0;
+  --socket: #2a2a2a; /* ROM socket body */
+  /* graphite fader cap */
+  --cap-border: #7a8698;
+  --cap-face: linear-gradient(180deg, #5a6474, #262b33);
+  --mono: ui-monospace, "Courier New", monospace;
+  font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+/* form controls take the panel font; their own rules set the size */
+button,
+input,
+select {
+  font: inherit;
+}
+/* keep the scrollbar's space reserved, so a height change never shifts the panel sideways */
+html {
+  scrollbar-gutter: stable;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0, #2b313b, var(--page) 70%);
+  color: var(--silk);
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+.barc {
+  width: 100%;
+  max-width: 1100px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--panel-top), var(--panel) 40%, var(--panel-bottom));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.silk,
+.port span,
+.key-label,
+.bank-title,
+.log-toggle {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-stretch: condensed;
+  font-size: 11px;
+  color: var(--silk);
+}
+/* header: blue trim stripe under the name plate */
+.plate {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--blue);
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-right: auto;
+}
+.wordmark {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+.wordmark-blue {
+  color: var(--blue-light);
+  text-shadow: 0 0 10px rgba(58, 141, 255, 0.35);
+}
+.badge {
+  background: var(--blue);
+  color: #fff;
+  border: 1px solid var(--blue-light);
+  border-radius: 2px;
+  padding: 1px 8px;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+.link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.port {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.port select {
+  background: var(--bezel);
+  color: var(--silk);
+  border: 1px solid var(--line);
+  padding: 3px;
+  max-width: 220px;
+  font-size: 13px;
+}
+.port select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: var(--blue-glow);
+}
+.led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3a0b08;
+  display: inline-block;
+  flex: none;
+}
+.led.on {
+  background: var(--led);
+  box-shadow: var(--glow);
+}
+.led.green {
+  background: #2cff5a;
+  box-shadow:
+    0 0 6px #2cff5a,
+    0 0 14px rgba(44, 255, 90, 0.5);
+}
+/* display */
+.display-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.display {
+  background: var(--led-window);
+  border: 2px solid var(--bezel);
+  border-radius: 4px;
+  padding: 10px 16px;
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.9),
+    0 0 0 1px var(--line);
+}
+.display-line {
+  font-family: var(--mono);
+  font-size: 22px;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--led);
+  text-shadow: var(--glow);
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.help {
+  min-height: 1.3em;
+  text-transform: none;
+  letter-spacing: 0.03em;
+  color: var(--silk-dim);
+}
+/* console */
+/* The console's height is set by the page keys, which have a fixed slot count and key height,
+   so it does not change between programs or while one loads; the faders stretch to fill it. */
+.console {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+.mix-col {
+  display: flex;
+  padding-right: 16px;
+  border-right: 1px solid var(--line);
+}
+.bank-faders {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  justify-content: space-between;
+}
+.fader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 92px;
+}
+/* fader legends sit in the same dark LED windows as the values (labels are at most 12 chars) */
+.led-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--led);
+  text-shadow: var(--glow);
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--led-window);
+  border: 1px solid var(--bezel);
+  padding: 0 5px;
+}
+.led-value {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--led);
+  text-shadow: var(--glow);
+  background: var(--led-window);
+  border: 1px solid var(--bezel);
+  padding: 0 6px;
+}
+.caption {
+  text-align: center;
+  height: 3.2em;
+  overflow: hidden;
+} /* two lines, fixed */
+.fader.empty .led-label,
+.fader.empty .led-value {
+  opacity: 0.35;
+}
+.fader input[type="range"] {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 36px;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 220px;
+  background: transparent;
+  margin: 0;
+  cursor: pointer;
+}
+.fader input[type="range"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.fader input[type="range"]::-webkit-slider-runnable-track {
+  width: 8px;
+  background: var(--bezel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.fader input[type="range"]::-moz-range-track {
+  width: 8px;
+  background: var(--bezel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+/* graphite cap with a blue index line */
+.fader input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: 32px;
+  height: 20px;
+  margin-left: -13px;
+  border: 1px solid var(--cap-border);
+  border-radius: 2px;
+  background-image: linear-gradient(var(--blue-light), var(--blue-light)), var(--cap-face);
+  background-size:
+    100% 2px,
+    100% 100%;
+  background-position:
+    center,
+    0 0;
+  background-repeat: no-repeat;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+/* separate from the WebKit rule: a selector list with both pseudo-elements is dropped by each browser */
+.fader input[type="range"]::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 32px;
+  height: 20px;
+  border: 1px solid var(--cap-border);
+  border-radius: 2px;
+  background-image: linear-gradient(var(--blue-light), var(--blue-light)), var(--cap-face);
+  background-size:
+    100% 2px,
+    100% 100%;
+  background-position:
+    center,
+    0 0;
+  background-repeat: no-repeat;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.fader input[type="range"]:hover:not(:disabled)::-webkit-slider-thumb {
+  border-color: var(--blue-light);
+}
+.fader input[type="range"]:hover:not(:disabled)::-moz-range-thumb {
+  border-color: var(--blue-light);
+}
+.fader input[type="range"]:focus-visible {
+  outline: 1px solid var(--blue);
+  outline-offset: 2px;
+}
+/* keys */
+.side-keys {
+  width: 190px;
+}
+.keys {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.key {
+  position: relative;
+  background: linear-gradient(180deg, var(--key-top), var(--key-bottom));
+  border: 1px solid var(--key-border);
+  border-radius: 3px;
+  color: var(--silk);
+  padding: 14px 8px 6px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.key .led {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 4px;
+  border-radius: 2px;
+}
+.key.lit {
+  border-color: var(--blue);
+  box-shadow:
+    inset 0 0 0 1px rgba(58, 141, 255, 0.35),
+    var(--blue-glow);
+}
+.key.lit .led {
+  background: var(--led);
+  box-shadow: var(--glow);
+}
+.key:hover:not(:disabled) {
+  border-color: var(--blue-light);
+}
+.key:focus-visible {
+  outline: 1px solid var(--blue-light);
+  outline-offset: 1px;
+}
+.key:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+/* page keys: fixed height that holds a two-line title; blank keys fill unused slots */
+.page-keys .key {
+  height: 44px;
+  padding-top: 13px;
+  padding-bottom: 5px;
+}
+.page-keys .key-label {
+  line-height: 1.15;
+}
+.key.blank {
+  cursor: default;
+  opacity: 0.45;
+  box-shadow: none;
+}
+.key-num {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue-light);
+}
+/* option and mono-output keys: one strip under the faders */
+.key-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.strip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.strip-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--line);
+}
+.key-strip .keys {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.key-strip .key {
+  width: 104px;
+}
+.out-title {
+  cursor: help;
+}
+.out-keys .key {
+  width: 92px;
+}
+/* wide enough for "DEFAULT (A+B+C+D)" on one line */
+.out-keys .key:first-child {
+  width: 148px;
+}
+/* keypad */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.bank {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bank-title {
+  text-align: center;
+  letter-spacing: 0.2em;
+  margin-bottom: 2px;
+  color: var(--blue-light);
+}
+/* log */
+.log-toggle {
+  background: none;
+  border: 1px solid var(--line);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.log-toggle:hover {
+  border-color: var(--blue-light);
+}
+.log-body {
+  margin: 6px 0 0;
+  max-height: 220px;
+  overflow: auto;
+  background: var(--bezel);
+  border: 1px solid var(--line);
+  padding: 8px;
+  font-size: 11px;
+  color: var(--info-text);
+}
+/* mono output panel */
+.info-body {
+  margin: 6px 0 0;
+  background: var(--bezel);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--info-text);
+}
+.info-body p {
+  margin: 0 0 6px;
+}
+.info-status {
+  color: var(--led);
+}
+/* ROM panel */
+.rom-board {
+  margin-top: 6px;
+  padding: 12px;
+  background: #1f3a2b;
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #f4f7f4;
+}
+.rom-title,
+.rom-silk {
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.rom-title {
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(244, 247, 244, 0.35);
+  padding-bottom: 3px;
+}
+.rom-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.rom-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.rom-socket {
+  position: relative;
+  padding: 6px 4px;
+  background: var(--socket);
+  border: 1px solid #111;
+  cursor: pointer;
+  color: inherit;
+}
+/* Two rows of 12 pin holes, under the chip's pins (pitch 10 px, centred on the chip). */
+.rom-socket::before {
+  content: "";
+  position: absolute;
+  left: 6.5px;
+  right: 6.5px;
+  top: 1px;
+  bottom: 1px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 2.5px 2.5px, #c9a227 1.5px, transparent 2px) top left / 10px 5px repeat-x,
+    radial-gradient(circle at 2.5px 2.5px, #c9a227 1.5px, transparent 2px) bottom left / 10px 5px repeat-x;
+}
+.rom-socket:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+.rom-socket:hover:not(:disabled) {
+  outline: 1px solid var(--blue-light);
+  outline-offset: 1px;
+}
+.rom-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 56px;
+}
+.state-flash .rom-chip,
+.state-builtin .rom-chip,
+.rom-socket.busy .rom-chip {
+  background: #151515;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.6);
+  border-radius: 2px;
+}
+.state-flash .rom-chip::before,
+.state-builtin .rom-chip::before,
+.rom-socket.busy .rom-chip::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--socket);
+}
+.state-flash .rom-chip::after,
+.state-builtin .rom-chip::after,
+.rom-socket.busy .rom-chip::after {
+  content: "";
+  position: absolute;
+  left: 2.5px;
+  right: 2.5px;
+  top: -5px;
+  bottom: -5px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, #c0c4c8 0 5px, transparent 5px 10px) top / 100% 5px no-repeat,
+    repeating-linear-gradient(90deg, #c0c4c8 0 5px, transparent 5px 10px) bottom / 100% 5px no-repeat;
+}
+.rom-empty {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--silk-dim);
+  background: var(--socket);
+  padding: 2px 6px;
+}
+.rom-paper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 92px;
+  height: 40px;
+  background: #efe6cc;
+  color: #222;
+}
+.rom-ver {
+  font-weight: 700;
+  font-size: 13px;
+}
+.rom-name {
+  font-size: 10px;
+}
+.rom-crc {
+  font-family: var(--mono);
+  font-size: 9px;
+}
+.rom-progress {
+  width: 76px;
+  height: 6px;
+  background: #c9bf9f;
+}
+.rom-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+}
+.rom-caption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+.rom-tag {
+  font-size: 10px;
+  color: var(--silk-dim);
+  letter-spacing: 0.08em;
+}
+.rom-key {
+  background: var(--key-bottom);
+  color: var(--silk);
+  border: 1px solid var(--key-border);
+  font-size: 10px;
+  padding: 1px 5px;
+  cursor: pointer;
+}
+.rom-key:hover:not(:disabled) {
+  border-color: var(--blue-light);
+}
+.rom-key:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.rom-status {
+  font-size: 12px;
+  color: #dfe9df;
+}
+@media (max-width: 800px) {
+  .console {
+    flex-wrap: wrap;
+  }
+  .side-keys {
+    width: 100%;
+  }
+  .keypad {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .strip-divider {
+    display: none;
+  }
+}

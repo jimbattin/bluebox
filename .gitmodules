@@ -1,0 +1,3 @@
+[submodule "daisy/libDaisy"]
+	path = daisy/libDaisy
+	url = https://github.com/electro-smith/libDaisy

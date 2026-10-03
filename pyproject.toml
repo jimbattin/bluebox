@@ -1,0 +1,12 @@
+[project]
+name = "bluebox-tools"
+version = "0.1.0"
+description = "Python research and pedal tools for the Lexicon 224XL emulation (tools/, daisy/tools/, daisy/bench/)"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",   # tools/wav_compare.py
+    "pyusb",   # daisy/tools/cdc_read.py (also needs the system libusb-1.0)
+]
+
+[tool.uv]
+package = false

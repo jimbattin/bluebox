@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Audio renders and logs
+*.wav
+*.log
+
+# C/C++ builds (emu CMake, daisy Make) and clangd
+build/
+build_noroms/
+compile_commands.json
+.cache/
+
+# Python (uv)
+.venv/
+__pycache__/
+*.pyc
+
+# Editor web app (Bun)
+editor/node_modules/
+editor/dist/
+
+# ROMs (incl. tools/rom_patch.py output), service documentation
+roms/
+*.[bB][iI][nN]
+*.pdf
